@@ -9,6 +9,8 @@ import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 import 'package:stream_transform/stream_transform.dart';
 
+import 'custom_stream_subscription.dart';
+
 // A dummy implementation of the platform interface for tests.
 class FakeGoogleMapsFlutterPlatform extends GoogleMapsFlutterPlatform {
   FakeGoogleMapsFlutterPlatform();
@@ -37,8 +39,22 @@ class FakeGoogleMapsFlutterPlatform extends GoogleMapsFlutterPlatform {
   final StreamController<MapEvent<dynamic>> mapEventStreamController =
       StreamController<MapEvent<dynamic>>.broadcast();
 
+  final List<StreamSubscriptionWrapper<void>> subscriptions = [];
+
   @override
-  Future<void> init(int mapId) async {}
+  Future<void> init(int mapId) async {
+    // Create custom subscriptions for each event stream.
+    final cameraMoveStartedSubscription = StreamSubscriptionWrapper<void>(
+      mapEventStreamController.stream
+          .whereType<CameraMoveStartedEvent>()
+          .listen(null),
+      () {
+        // This callback will be called when cancel() is called on the custom subscription.
+        print('CameraMoveStartedEvent subscription canceled');
+      },
+    );
+    subscriptions.add(cameraMoveStartedSubscription);
+  }
 
   @override
   Future<void> updateMapConfiguration(
