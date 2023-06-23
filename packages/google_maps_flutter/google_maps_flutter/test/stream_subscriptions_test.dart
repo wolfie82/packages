@@ -7,6 +7,37 @@ import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platf
 
 import 'fake_google_maps_flutter_platform.dart';
 
+class GoogleMapWrapper extends StatefulWidget {
+  final Function(GoogleMapController) onMapCreated;
+
+  GoogleMapWrapper({required this.onMapCreated});
+
+  @override
+  _GoogleMapWrapperState createState() => _GoogleMapWrapperState();
+}
+
+class _GoogleMapWrapperState extends State<GoogleMapWrapper> {
+  GoogleMapController? _controller;
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GoogleMap(
+      onMapCreated: (controller) {
+        _controller = controller;
+        widget.onMapCreated(controller);
+      },
+      initialCameraPosition:
+          CameraPosition(target: LatLng(0.0, 0.0), zoom: 10.0),
+    );
+  }
+}
+
 void main() {
   testWidgets('Subscriptions are cleaned up on dispose',
       (WidgetTester tester) async {
@@ -17,12 +48,10 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: GoogleMap(
+        home: GoogleMapWrapper(
           onMapCreated: (controller) {
             controllerCompleter.complete(controller);
           },
-          initialCameraPosition:
-              CameraPosition(target: LatLng(0.0, 0.0), zoom: 10.0),
         ),
       ),
     );
