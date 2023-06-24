@@ -21,6 +21,9 @@ class GoogleMapController {
   /// Subscriptions to events from the native side of this controller.
   final List<StreamSubscription<void>> _subscriptions = [];
 
+  ///
+  List<StreamSubscription<dynamic>> get subscriptions => _subscriptions;
+
   /// Initialize control of a [GoogleMap] with [id].
   ///
   /// Mainly for internal use when instantiating a [GoogleMapController] passed
